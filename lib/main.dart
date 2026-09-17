@@ -14,7 +14,7 @@ class PortfolioApp extends StatelessWidget {
     return MaterialApp(
       title: 'Richard S - Flutter Developer',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
       home: const HomePage(),
     );
   }

@@ -1,326 +1,230 @@
 import 'package:flutter/material.dart';
-import 'package:animated_text_kit/animated_text_kit.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../core/constants.dart';
 import '../core/theme.dart';
 import '../core/responsive.dart';
 
 class HeroSection extends StatelessWidget {
-  const HeroSection({super.key});
+  const HeroSection({
+    super.key,
+    required this.onNavigate,
+  });
+
+  final Function(int) onNavigate;
 
   @override
   Widget build(BuildContext context) {
     final isMobile = Responsive.isMobile(context);
-    final padding = Responsive.contentPadding(context);
+    final isTablet = Responsive.isTablet(context);
+    final hPadding = Responsive.contentPadding(context);
 
     return Container(
       width: double.infinity,
-      constraints: BoxConstraints(
-        minHeight: MediaQuery.of(context).size.height - 70,
+      color: AppTheme.bgLight,
+      padding: EdgeInsets.symmetric(
+        horizontal: hPadding,
+        vertical: isMobile ? 40 : 80,
       ),
-      padding: EdgeInsets.fromLTRB(
-        isMobile ? padding : padding + 60,
-        60,
-        padding,
-        60,
-      ),
-      decoration: BoxDecoration(
-        color: AppTheme.bgPrimary,
-        gradient: RadialGradient(
-          center: const Alignment(0.7, -0.3),
-          radius: 1.2,
-          colors: [AppTheme.neonBlue.withOpacity(0.08), AppTheme.bgPrimary],
-        ),
-      ),
-      child: isMobile
-          ? _buildMobileLayout(context)
-          : _buildDesktopLayout(context),
-    );
-  }
-
-  Widget _buildDesktopLayout(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(flex: 3, child: _buildTextContent(context)),
-        const SizedBox(width: 60),
-        Expanded(flex: 2, child: _buildAvatar()),
-      ],
-    );
-  }
-
-  Widget _buildMobileLayout(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildAvatar(),
-        const SizedBox(height: 40),
-        _buildTextContent(context),
-      ],
-    );
-  }
-
-  Widget _buildTextContent(BuildContext context) {
-    final isMobile = Responsive.isMobile(context);
-    return Column(
-      crossAxisAlignment: isMobile
-          ? CrossAxisAlignment.center
-          : CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          height: 50,
-          child: AnimatedTextKit(
-            repeatForever: true,
-            animatedTexts: [
-              TypewriterAnimatedText(
-                'I Am ${AppConstants.name} 👋',
-                textStyle: TextStyle(
-                  fontSize: isMobile ? 32 : 48,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1100),
+          child: isMobile
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildAvatar(size: 260),
+                    const SizedBox(height: 36),
+                    _buildContent(context, isMobile: true),
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      flex: 5,
+                      child: Center(
+                        child: _buildAvatar(size: isTablet ? 300 : 380),
+                      ),
+                    ),
+                    const SizedBox(width: 60),
+                    Expanded(
+                      flex: 6,
+                      child: _buildContent(context, isMobile: false),
+                    ),
+                  ],
                 ),
-                speed: const Duration(milliseconds: 80),
-              ),
-            ],
-          ),
         ),
-        const SizedBox(height: 12),
-        Row(
-          mainAxisSize: isMobile ? MainAxisSize.min : MainAxisSize.max,
-          children: [
-            Text(
-              'Flutter ',
-              style: TextStyle(
-                fontSize: isMobile ? 28 : 42,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
+      ),
+    );
+  }
+
+  Widget _buildAvatar({required double size}) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: const Color(0xFFD9D9D9),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
+          ),
+        ],
+      ),
+      child: ClipOval(
+        child: Image.asset(
+          'assets/profile.png',
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          filterQuality: FilterQuality.high,
+          errorBuilder: (context, error, stackTrace) {
+            return Center(
+              child: Icon(
+                Icons.person,
+                size: size * 0.45,
+                color: AppTheme.textMuted,
               ),
-            ),
-            GradientText(
-              'Developer',
-              gradient: AppTheme.neonGradient,
-              style: TextStyle(
-                fontSize: isMobile ? 28 : 42,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, {required bool isMobile}) {
+    return Column(
+      crossAxisAlignment:
+          isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Hello',
+          style: TextStyle(
+            fontSize: isMobile ? 54 : 76,
+            fontWeight: FontWeight.w800,
+            color: AppTheme.textBlack,
+            letterSpacing: -1.5,
+            height: 1.05,
+          ),
+          textAlign: isMobile ? TextAlign.center : TextAlign.start,
         ),
         const SizedBox(height: 20),
         Text(
-          AppConstants.summary,
-          textAlign: isMobile ? TextAlign.center : TextAlign.left,
-          maxLines: 3,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 15,
-            color: AppTheme.textSecondary,
-            height: 1.6,
+          'A Bit About Me',
+          style: TextStyle(
+            fontSize: isMobile ? 18 : 22,
+            fontWeight: FontWeight.w700,
+            color: AppTheme.textBlack,
           ),
+          textAlign: isMobile ? TextAlign.center : TextAlign.start,
         ),
-        const SizedBox(height: 32),
-        Row(
-          mainAxisSize: isMobile ? MainAxisSize.min : MainAxisSize.max,
+        const SizedBox(height: 16),
+        Text(
+          AppConstants.aboutMe,
+          style: TextStyle(
+            fontSize: isMobile ? 14 : 16,
+            fontWeight: FontWeight.w400,
+            color: AppTheme.textSecondary,
+            height: 1.75,
+          ),
+          textAlign: isMobile ? TextAlign.center : TextAlign.start,
+        ),
+        const SizedBox(height: 36),
+
+        // The 3 Signature Circular Buttons (Resume, Projects, Contact)
+        Wrap(
+          alignment: isMobile ? WrapAlignment.center : WrapAlignment.start,
+          spacing: 16,
+          runSpacing: 16,
           children: [
-            _DownloadCVButton(),
-            const SizedBox(width: 16),
-            _SocialIconButton(
-              icon: FontAwesomeIcons.linkedinIn,
-              url: AppConstants.linkedIn,
+            _CircleActionButton(
+              label: 'Resume',
+              color: AppTheme.accentYellow,
+              onTap: () => onNavigate(1),
             ),
-            const SizedBox(width: 12),
-            _SocialIconButton(
-              icon: FontAwesomeIcons.github,
-              url: AppConstants.github,
+            _CircleActionButton(
+              label: 'Projects',
+              color: AppTheme.accentRed,
+              onTap: () => onNavigate(2),
+            ),
+            _CircleActionButton(
+              label: 'Contact',
+              color: AppTheme.accentBlue,
+              onTap: () => onNavigate(3),
             ),
           ],
         ),
       ],
     );
   }
-
-  Widget _buildAvatar() {
-    return Stack(
-      alignment: Alignment.center,
-      clipBehavior: Clip.none,
-      children: [
-        // Background Glow (Neon Purple)
-        Container(
-          width: 300,
-          height: 300,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.neonPurple.withOpacity(0.2),
-                blurRadius: 100,
-                spreadRadius: 20,
-              ),
-            ],
-          ),
-        ),
-        // The Ring (Neon Gradient)
-        Container(
-          width: 320,
-          height: 320,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: AppTheme.neonGradient,
-          ),
-          child: Container(
-            margin: const EdgeInsets.all(8), // Ring thickness
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppTheme.bgPrimary, // Inner cutout
-            ),
-          ),
-        ),
-        // Floating Symbols
-        Positioned(
-          top: 40,
-          left: -60,
-          child: Opacity(
-            opacity: 0.4,
-            child: GradientText(
-              '<',
-              gradient: AppTheme.neonGradient,
-              style: const TextStyle(
-                fontSize: 80,
-                fontWeight: FontWeight.w100,
-                fontFamily: 'Courier',
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          bottom: 40,
-          right: -60,
-          child: Opacity(
-            opacity: 0.4,
-            child: GradientText(
-              '>',
-              gradient: AppTheme.neonGradient,
-              style: const TextStyle(
-                fontSize: 80,
-                fontWeight: FontWeight.w100,
-                fontFamily: 'Courier',
-              ),
-            ),
-          ),
-        ),
-        // Profile Image (No box)
-        SizedBox(
-          width: 500,
-          height: 500,
-          child: Image.asset(
-            'assets/profile.png',
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => Container(
-              color: AppTheme.bgCard,
-              child: Center(
-                child: GradientText(
-                  'RS',
-                  gradient: AppTheme.neonGradient,
-                  style: const TextStyle(fontSize: 80, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 }
 
-class _DownloadCVButton extends StatefulWidget {
+class _CircleActionButton extends StatefulWidget {
+  const _CircleActionButton({
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
   @override
-  State<_DownloadCVButton> createState() => _DownloadCVButtonState();
+  State<_CircleActionButton> createState() => _CircleActionButtonState();
 }
 
-class _DownloadCVButtonState extends State<_DownloadCVButton> {
+class _CircleActionButtonState extends State<_CircleActionButton> {
   bool _hovered = false;
 
   @override
   Widget build(BuildContext context) {
+    const double size = 120;
+
     return MouseRegion(
+      cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
-        onTap: () => launchUrl(Uri.parse('/assets/pdf/Richard_%20Flutter%20Developer.pdf')),
+        onTap: widget.onTap,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+          duration: const Duration(milliseconds: 200),
+          width: size,
+          height: size,
+          transform: Matrix4.translationValues(0.0, _hovered ? -6.0 : 0.0, 0.0)
+            ..multiply(Matrix4.diagonal3Values(
+                _hovered ? 1.05 : 1.0, _hovered ? 1.05 : 1.0, 1.0)),
           decoration: BoxDecoration(
-            gradient: AppTheme.buttonGradient,
-            borderRadius: BorderRadius.circular(30),
+            color: widget.color,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.black, width: 1.2),
             boxShadow: _hovered
                 ? [
                     BoxShadow(
-                      color: AppTheme.neonPink.withOpacity(0.4),
-                      blurRadius: 20,
-                      spreadRadius: 2,
+                      color: Colors.black.withValues(alpha: 0.18),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
                     ),
                   ]
-                : [],
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
           ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Download CV',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
+          child: Center(
+            child: Text(
+              widget.label,
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                color: Colors.black,
+                letterSpacing: -0.2,
               ),
-              SizedBox(width: 8),
-              Icon(Icons.download_rounded, color: Colors.white, size: 20),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SocialIconButton extends StatefulWidget {
-  const _SocialIconButton({required this.icon, required this.url});
-  final IconData icon;
-  final String url;
-
-  @override
-  State<_SocialIconButton> createState() => _SocialIconButtonState();
-}
-
-class _SocialIconButtonState extends State<_SocialIconButton> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: () => launchUrl(Uri.parse(widget.url)),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: _hovered ? AppTheme.neonPurple : AppTheme.textMuted,
             ),
-            color: _hovered
-                ? AppTheme.neonPurple.withOpacity(0.1)
-                : Colors.transparent,
-          ),
-          child: FaIcon(
-            widget.icon,
-            color: _hovered ? AppTheme.neonPurple : AppTheme.textSecondary,
-            size: 20,
           ),
         ),
       ),

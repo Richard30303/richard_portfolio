@@ -1,73 +1,136 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../core/constants.dart';
 import '../core/theme.dart';
 import '../core/responsive.dart';
 
 class NavBar extends StatelessWidget {
-  const NavBar({super.key, required this.onNavTap, required this.scaffoldKey});
+  const NavBar({
+    super.key,
+    required this.currentIndex,
+    required this.onNavTap,
+    required this.scaffoldKey,
+  });
 
-  final void Function(int index) onNavTap;
+  final int currentIndex;
+  final Function(int) onNavTap;
   final GlobalKey<ScaffoldState> scaffoldKey;
-
-  static const List<String> navItems = [
-    'Home',
-    'About',
-    'Skills',
-    'Experience',
-    'Projects',
-    'Education',
-    'Contact',
-  ];
 
   @override
   Widget build(BuildContext context) {
     final isMobile = Responsive.isMobile(context);
+    final hPadding = Responsive.contentPadding(context);
+
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: Responsive.contentPadding(context),
-        vertical: 16,
-      ),
-      color: AppTheme.bgPrimary.withOpacity(0.9),
+      width: double.infinity,
+      height: 85,
+      color: AppTheme.bgLight,
+      padding: EdgeInsets.symmetric(horizontal: hPadding),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Logo
-          Image.asset(
-            'assets/logo.png',
-            height: 40,
-            errorBuilder: (context, error, stackTrace) => GradientText(
-              'RS',
-              gradient: AppTheme.neonGradient,
-              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+          // Brand Logo: Orange Dot + Name + Role
+          InkWell(
+            onTap: () => onNavTap(0),
+            hoverColor: Colors.transparent,
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 18,
+                  height: 18,
+                  decoration: const BoxDecoration(
+                    color: AppTheme.accentYellow,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  AppConstants.name,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.textBlack,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  AppConstants.title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w400,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ),
-          const Spacer(),
-          if (!isMobile) ...[
-            for (int i = 0; i < navItems.length; i++) ...[
-              _NavItem(label: navItems[i], onTap: () => onNavTap(i)),
-              if (i < navItems.length - 1) const SizedBox(width: 8),
-            ],
-            const SizedBox(width: 20),
-          ],
-          // WhatsApp button
-          _WhatsAppButton(compact: isMobile),
-          if (isMobile) ...[
-            const SizedBox(width: 8),
+
+          // Navigation Links
+          if (isMobile)
             IconButton(
-              icon: const Icon(Icons.menu, color: AppTheme.textPrimary),
+              icon: const Icon(Icons.menu, color: AppTheme.textBlack, size: 28),
               onPressed: () => scaffoldKey.currentState?.openEndDrawer(),
+            )
+          else
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _NavItem(
+                  title: 'Resume',
+                  isActive: currentIndex == 1,
+                  onTap: () => onNavTap(1),
+                ),
+                const _NavDivider(),
+                _NavItem(
+                  title: 'Projects',
+                  isActive: currentIndex == 2,
+                  onTap: () => onNavTap(2),
+                ),
+                const _NavDivider(),
+                _NavItem(
+                  title: 'Contact',
+                  isActive: currentIndex == 3,
+                  onTap: () => onNavTap(3),
+                ),
+              ],
             ),
-          ],
         ],
       ),
     );
   }
 }
 
+class _NavDivider extends StatelessWidget {
+  const _NavDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 14),
+      child: Text(
+        '|',
+        style: TextStyle(
+          color: AppTheme.dividerGrey,
+          fontSize: 16,
+          fontWeight: FontWeight.w300,
+        ),
+      ),
+    );
+  }
+}
+
 class _NavItem extends StatefulWidget {
-  const _NavItem({required this.label, required this.onTap});
-  final String label;
+  const _NavItem({
+    required this.title,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  final String title;
+  final bool isActive;
   final VoidCallback onTap;
 
   @override
@@ -79,71 +142,25 @@ class _NavItemState extends State<_NavItem> {
 
   @override
   Widget build(BuildContext context) {
+    final color = widget.isActive
+        ? AppTheme.accentYellow
+        : (_hovered ? AppTheme.accentYellow : AppTheme.textBlack);
+
     return MouseRegion(
+      cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
         onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: _hovered
-                ? AppTheme.neonPurple.withOpacity(0.15)
-                : Colors.transparent,
+        child: AnimatedDefaultTextStyle(
+          duration: const Duration(milliseconds: 150),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: widget.isActive ? FontWeight.w700 : FontWeight.w500,
+            color: color,
+            fontFamily: 'Outfit',
           ),
-          child: Text(
-            widget.label,
-            style: TextStyle(
-              color: _hovered ? AppTheme.neonPurple : AppTheme.textSecondary,
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _WhatsAppButton extends StatelessWidget {
-  const _WhatsAppButton({this.compact = false});
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => launchUrl(Uri.parse(AppConstants.whatsApp)),
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: compact ? 14 : 20,
-          vertical: 10,
-        ),
-        decoration: BoxDecoration(
-          gradient: AppTheme.buttonGradient,
-          borderRadius: BorderRadius.circular(25),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const FaIcon(
-              FontAwesomeIcons.whatsapp,
-              color: Colors.white,
-              size: 18,
-            ),
-            if (!compact) ...[
-              const SizedBox(width: 8),
-              const Text(
-                'Whatsapp',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ],
+          child: Text(widget.title),
         ),
       ),
     );
@@ -151,66 +168,110 @@ class _WhatsAppButton extends StatelessWidget {
 }
 
 class NavDrawer extends StatelessWidget {
-  const NavDrawer({super.key, required this.onNavTap});
-  final void Function(int index) onNavTap;
+  const NavDrawer({
+    super.key,
+    required this.currentIndex,
+    required this.onNavTap,
+  });
+
+  final int currentIndex;
+  final Function(int) onNavTap;
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: AppTheme.bgSecondary,
+      backgroundColor: AppTheme.bgLight,
       child: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Image.asset(
-                'assets/logo.png',
-                height: 50,
-                errorBuilder: (context, error, stackTrace) => GradientText(
-                  'RS',
-                  gradient: AppTheme.neonGradient,
-                  style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 14,
+                        height: 14,
+                        decoration: const BoxDecoration(
+                          color: AppTheme.accentYellow,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        AppConstants.name,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.textBlack,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-            ),
-            const Divider(color: AppTheme.textMuted, height: 1),
-            const SizedBox(height: 16),
-            for (int i = 0; i < NavBar.navItems.length; i++)
-              ListTile(
-                title: Text(
-                  NavBar.navItems[i],
-                  style: const TextStyle(
-                    color: AppTheme.textPrimary,
-                    fontSize: 16,
+                  IconButton(
+                    icon: const Icon(Icons.close, color: AppTheme.textBlack),
+                    onPressed: () => Navigator.of(context).pop(),
                   ),
-                ),
-                leading: Icon(
-                  _navIcons[i],
-                  color: AppTheme.neonPurple,
-                  size: 20,
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  onNavTap(i);
-                },
+                ],
               ),
-          ],
+              const SizedBox(height: 12),
+              const Divider(color: AppTheme.dividerGrey),
+              const SizedBox(height: 24),
+              _buildDrawerItem(
+                context,
+                title: 'Home',
+                index: 0,
+              ),
+              const SizedBox(height: 16),
+              _buildDrawerItem(
+                context,
+                title: 'Resume',
+                index: 1,
+              ),
+              const SizedBox(height: 16),
+              _buildDrawerItem(
+                context,
+                title: 'Projects',
+                index: 2,
+              ),
+              const SizedBox(height: 16),
+              _buildDrawerItem(
+                context,
+                title: 'Contact',
+                index: 3,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  static const List<IconData> _navIcons = [
-    Icons.home_rounded,
-    Icons.person_rounded,
-    Icons.code_rounded,
-    Icons.work_rounded,
-    Icons.apps_rounded,
-    Icons.school_rounded,
-    Icons.mail_rounded,
-  ];
+  Widget _buildDrawerItem(
+    BuildContext context, {
+    required String title,
+    required int index,
+  }) {
+    final isActive = currentIndex == index;
+    return InkWell(
+      onTap: () {
+        Navigator.of(context).pop();
+        onNavTap(index);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Text(
+          title,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+            color: isActive ? AppTheme.accentYellow : AppTheme.textBlack,
+          ),
+        ),
+      ),
+    );
+  }
 }

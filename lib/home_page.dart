@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import 'core/theme.dart';
-import 'core/responsive.dart';
 import 'widgets/nav_bar.dart';
-import 'widgets/side_bar.dart';
+import 'widgets/footer.dart';
 import 'sections/hero_section.dart';
-import 'sections/about_section.dart';
-import 'sections/skills_section.dart';
-import 'sections/experience_section.dart';
+import 'sections/resume_section.dart';
 import 'sections/projects_section.dart';
-import 'sections/education_section.dart';
 import 'sections/contact_section.dart';
 
 class HomePage extends StatefulWidget {
@@ -19,21 +15,36 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int _currentIndex = 0;
   final ScrollController _scrollController = ScrollController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // Section keys for scroll navigation
-  final List<GlobalKey> _sectionKeys = List.generate(7, (_) => GlobalKey());
+  void _switchTab(int index) {
+    if (_currentIndex != index) {
+      setState(() {
+        _currentIndex = index;
+      });
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    }
+  }
 
-  void _scrollToSection(int index) {
-    final key = _sectionKeys[index];
-    final context = key.currentContext;
-    if (context != null) {
-      Scrollable.ensureVisible(
-        context,
-        duration: const Duration(milliseconds: 600),
-        curve: Curves.easeInOut,
-      );
+  Widget _getCurrentView() {
+    switch (_currentIndex) {
+      case 1:
+        return const ResumeSection();
+      case 2:
+        return const ProjectsSection();
+      case 3:
+        return const ContactSection();
+      case 0:
+      default:
+        return HeroSection(onNavigate: _switchTab);
     }
   }
 
@@ -45,49 +56,50 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = Responsive.isMobile(context);
-
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: AppTheme.bgPrimary,
-      endDrawer: NavDrawer(onNavTap: _scrollToSection),
-      body: Stack(
+      backgroundColor: AppTheme.bgLight,
+      endDrawer: NavDrawer(
+        currentIndex: _currentIndex,
+        onNavTap: _switchTab,
+      ),
+      body: Column(
         children: [
-          // Main scrollable content
-          SingleChildScrollView(
-            controller: _scrollController,
-            child: Column(
-              children: [
-                // Spacer for nav bar
-                const SizedBox(height: 70),
-                _buildSection(0, const HeroSection()),
-                _buildSection(1, const AboutSection()),
-                _buildSection(2, const SkillsSection()),
-                _buildSection(3, const ExperienceSection()),
-                _buildSection(4, const ProjectsSection()),
-                _buildSection(5, const EducationSection()),
-                _buildSection(6, const ContactSection()),
-              ],
+          // Sticky Top Navigation Bar
+          NavBar(
+            currentIndex: _currentIndex,
+            onNavTap: _switchTab,
+            scaffoldKey: _scaffoldKey,
+          ),
+
+          // Scrollable View Content + Footer
+          Expanded(
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              child: Column(
+                children: [
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    switchInCurve: Curves.easeInOut,
+                    switchOutCurve: Curves.easeInOut,
+                    transitionBuilder: (child, animation) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      );
+                    },
+                    child: KeyedSubtree(
+                      key: ValueKey<int>(_currentIndex),
+                      child: _getCurrentView(),
+                    ),
+                  ),
+                  const Footer(),
+                ],
+              ),
             ),
           ),
-          // Fixed nav bar
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: NavBar(
-              onNavTap: _scrollToSection,
-              scaffoldKey: _scaffoldKey,
-            ),
-          ),
-          // Side bar (desktop only)
-          if (!isMobile) const SideBar(),
         ],
       ),
     );
-  }
-
-  Widget _buildSection(int index, Widget section) {
-    return Container(key: _sectionKeys[index], child: section);
   }
 }

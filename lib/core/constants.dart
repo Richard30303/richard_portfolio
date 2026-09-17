@@ -10,23 +10,24 @@ class AppConstants {
   static const String whatsApp = 'https://wa.me/916385395991';
 
   static const String summary =
-      'Flutter Developer with 2+ years of experience building 15+ production apps, '
-      'including 6 on the Apple App Store and 9 on the Google Play Store. '
+      'Flutter Developer with 3+ years of experience building 16+ production '
+      'apps, '
+      'including 7 on the Apple App Store and 10 on the Google Play Store. '
       'Expertise in GetX, BLoC, RESTful APIs, and Firebase integration across '
       'Finance, Business, and E-commerce ecosystems.';
 
   static const String aboutMe =
       "I'm a passionate Flutter Developer who loves turning ideas into beautiful, "
       "functional mobile applications. With expertise in Clean Architecture, MVVM "
-      "design patterns, and 2+ years of experience, I've successfully shipped "
-      "6 apps on the Apple App Store and 9 on the Google Play Store across "
+      "design patterns, and 3+ years of experience, I've successfully shipped "
+      "7 apps on the Apple App Store and 10 on the Google Play Store across "
       "Finance, Business, and Food & Drink categories.";
 
   static const List<Map<String, String>> stats = [
     {'count': '2+', 'label': 'Years\nExperience'},
-    {'count': '15+', 'label': 'Apps\nDelivered'},
-    {'count': '6', 'label': 'Apps on\nApp Store'},
-    {'count': '9', 'label': 'Apps on\nPlay Store'},
+    {'count': '16+', 'label': 'Apps\nDelivered'},
+    {'count': '7', 'label': 'Apps on\nApp Store'},
+    {'count': '10', 'label': 'Apps on\nPlay Store'},
   ];
 
   static const Map<String, List<String>> skills = {
@@ -122,6 +123,28 @@ class AppConstants {
   ];
 
   static const List<Map<String, dynamic>> projects = [
+    {
+      'name': 'TN - Trusted Network',
+      'subtitle': 'Business Social Networking Platform',
+      'period': '2026 - Present',
+      'tech': 'Flutter, Dart, RESTful APIs, Social Networking, FCM',
+      'status': 'App Store & Play Store (Live)',
+      'image': 'assets/projects/trusted_network/overview.png',
+      'playStoreUrl':
+          'https://play.google.com/store/apps/details?id=com.oceansoftware.ctn_business_app&pcampaignid=web_share',
+      'appStoreUrl':
+          'https://apps.apple.com/in/app/trusted-network/id6786537784',
+      'images': [
+        'assets/projects/trusted_network/features.png',
+        'assets/projects/trusted_network/notifications.png',
+      ],
+      'points': [
+        'Comprehensive business networking ecosystem empowering verified entrepreneurs to build digital trust and unlock high-value referrals.',
+        'Interactive Collaboration Board: Modules for Post, Ask, Give, Business Requirement, and Milestone tracking.',
+        'Real-time Notification Center: Instant alerts for direct member referrals, 1-on-1 meeting reminders, business requirements, and member achievements.',
+        'Location-based Smart Search: Discover nearby chapters, verified members, and industry partners.',
+      ],
+    },
     {
       'name': 'Star Business Forum',
       'subtitle': 'Professional Networking Ecosystem',
